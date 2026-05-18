@@ -13,7 +13,21 @@ type Order struct{
   value float32
 }
 
-func checkTableExists(db *sql.DB, schema string, table string) bool {
+var SetupTables = map[string]string{
+  "clients": `
+    create table clients(
+        id integer
+          primary key
+          generated always as identity,
+        name varchar(50),
+        created_at timestamp default now()
+    );
+  `,
+  "orders": "create table orders(id serial, client_id int, value money, created_at timestamp);",
+}
+
+
+func CheckTableExists(db *sql.DB, schema string, table string) bool {
   const query string = `
     SELECT EXISTS (
       SELECT 1
@@ -37,21 +51,8 @@ func SetupDB(db *sql.DB) {
 }
 
 func createTables(db *sql.DB) {
-  var tables = map[string]string{
-    "clients": `
-      create table clients(
-          id integer
-            primary key
-            generated always as identity,
-          name varchar(50),
-          created_at timestamp default now()
-      );
-    `,
-    "orders": "create table orders(id serial, client_id int, value money, created_at timestamp);",
-  }
-
-  for key, val := range tables {
-    if (!checkTableExists(db, "public", key)) {
+  for key, val := range SetupTables {
+    if (!CheckTableExists(db, "public", key)) {
       _, err := db.Exec(val)
       if err != nil {
         panic(err);
@@ -61,7 +62,6 @@ func createTables(db *sql.DB) {
 }
 
 func insertTables(db *sql.DB) {
-  // TODO: Finish
   clients := []Client{
     {
       name: "client1",

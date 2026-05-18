@@ -12,7 +12,7 @@ import (
 	"github.com/moby/moby/client"
 )
 
-const ContainerSetupDelay time.Duration = time.Second * 10
+const ContainerSetupDelay time.Duration = time.Second * 3
 
 func StartPostgresContainer(moby *client.Client, containerName string) error {
   if !containerExists(moby, containerName) {
